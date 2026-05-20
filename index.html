@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QAVault — UAT Test Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #faf7f2;
+  --warm: #f2ede4;
+  --paper: #fffef9;
+  --ink: #1a1814;
+  --ink2: #3d3a34;
+  --muted: #8a8480;
+  --rule: #e0d9ce;
+  --blue: #1b4fd8;
+  --blue-light: #e8effe;
+  --blue-mid: #3b6ef5;
+  --green: #166534;
+  --green-light: #dcfce7;
+  --green-mid: #16a34a;
+  --red: #991b1b;
+  --red-light: #fee2e2;
+  --red-mid: #dc2626;
+  --amber: #92400e;
+  --amber-light: #fef3c7;
+  --amber-mid: #d97706;
+  --purple: #5b21b6;
+  --purple-light: #ede9fe;
+  --shadow: 0 1px 3px rgba(26,24,20,0.08), 0 4px 16px rgba(26,24,20,0.06);
+  --shadow-lg: 0 8px 32px rgba(26,24,20,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* Ruled paper texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent, transparent 31px,
+    rgba(26,24,20,0.04) 31px, rgba(26,24,20,0.04) 32px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; }
+
+/* ── Sidebar ── */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 240px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: var(--blue-mid);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-icon svg { width: 20px; height: 20px; }
+
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+.brand-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.nav-section label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-item.active { background: var(--blue-mid); color: #fff; }
+.nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+.nav-count {
+  margin-left: auto;
+  background: rgba(255,255,255,0.15);
+  border-radius: 100px;
+  padding: 1px 7px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+}
+.nav-item.active .nav-count { background: rgba(255,255,255,0.25); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.6;
+}
+.sidebar-footer strong { color: rgba(255,255,255,0.6); display: block; margin-bottom: 2px; }
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  padding: 32px 36px;
+  overflow-x: hidden;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+.page-title p {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Stats ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--stat-color, var(--blue-mid));
+  border-radius: 3px 0 0 3px;
+}
+.stat.green { --stat-color: var(--green-mid); }
+.stat.red { --stat-color: var(--red-mid); }
+.stat.amber { --stat-color: var(--amber-mid); }
+.stat.purple { --stat-color: #7c3aed; }
+
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.stat-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Progress bar */
+.progress-wrap {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.progress-header span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.progress-header strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+.progress-track {
+  height: 10px;
+  background: var(--warm);
+  border-radius: 100px;
+  overflow: hidden;
+  display: flex;
+  gap: 2px;
+}
+.progress-pass { background: var(--green-mid); border-radius: 100px 0 0 100px; transition: width 0.5s ease; }
+.progress-fail { background: var(--red-mid); transition: width 0.5s ease; }
+.progress-blocked { background: var(--amber-mid); transition: width 0.5s ease; }
+.progress-pending { background: #cbd5e1; border-radius: 0 100px 100px 0; transition: width 0.5s ease; }
+.progress-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 2px;
+}
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.search-box input {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 9px 14px 9px 36px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow);
+}
+.search-box input:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(59,110,245,0.1); }
+.search-box input::placeholder { color: var(--muted); }
+.search-box::before {
+  content: '⌕';
+  position: absolute;
+  left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+select, .filter-select {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--ink);
+  outline: none;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s;
+}
+select:focus { border-color: var(--blue-mid); }
+
+.btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--blue); color: #fff; box-shadow: var(--shadow); }
+.btn-primary:hover { background: var(--blue-mid); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-ghost { background: var(--paper); border: 1px solid var(--rule); color: var(--ink2); box-shadow: var(--shadow); }
+.btn-ghost:hover { border-color: var(--blue-mid); color: var(--blue); }
+.btn-danger { background: var(--red-light); border: 1px solid #fecaca; color: var(--red); }
+.btn-danger:hover { background: #fecaca; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead th {
+  padding: 11px 16px;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--warm);
+  border-bottom: 1px solid var(--rule);
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.12s;
+  animation: rowIn 0.25s ease both;
+}
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--warm); }
+
+td {
+  padding: 13px 16px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.tc-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.tc-title { font-weight: 500; color: var(--ink); }
+.tc-module {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.priority-high { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+.priority-medium { background: var(--amber-light); color: var(--amber); border: 1px solid #fde68a; }
+.priority-low { background: var(--blue-light); color: var(--blue); border: 1px solid #bfdbfe; }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+}
+.status-badge::before { content: '●'; font-size: 6px; }
+.s-pass { background: var(--green-light); color: var(--green); border: 1px solid #bbf7d0; }
+.s-fail { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+.s-blocked { background: var(--amber-light); color: var(--amber); border: 1px solid #fde68a; }
+.s-pending { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.s-in-progress { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+
+.actions { display: flex; gap: 6px; }
+
+/* Defect indicator */
+.defect-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--red);
+  background: var(--red-light);
+  border: 1px solid #fecaca;
+  border-radius: 100px;
+  padding: 2px 8px;
+}
+.defect-count.none { color: var(--muted); background: transparent; border-color: transparent; }
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 36px; margin-bottom: 12px; }
+.empty h3 { font-size: 16px; color: var(--ink); font-family: 'Playfair Display', serif; margin-bottom: 6px; }
+.empty p { font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+
+/* ── Modal ── */
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,24,20,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.open { display: flex; }
+
+.modal {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.2s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-header { margin-bottom: 24px; }
+.modal-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.modal-header p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.form-grid .full { grid-column: 1 / -1; }
+
+.field label {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px rgba(59,110,245,0.1);
+}
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+
+/* ── Defect panel (slide-in) ── */
+.defect-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,24,20,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 20px;
+}
+.defect-panel.open { display: flex; }
+.defect-inner {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.25s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.defect-inner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.defect-inner p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.defect-list { margin-bottom: 20px; }
+.defect-item {
+  background: var(--warm);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.defect-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.defect-item-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--red);
+}
+.defect-item-title { font-size: 13px; font-weight: 500; }
+.defect-item-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.add-defect-form { border-top: 1px solid var(--rule); padding-top: 16px; }
+.add-defect-form h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.add-defect-form .field { margin-bottom: 10px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { padding: 20px 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: 1; }
+  thead th:nth-child(4), td:nth-child(4),
+  thead th:nth-child(5), td:nth-child(5) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="2" width="7" height="7" rx="1.5" fill="white"/>
+          <rect x="11" y="2" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+          <rect x="2" y="11" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+          <path d="M12 15.5L14 17.5L18 13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">QAVault</div>
+        <div class="brand-sub">UAT Management</div>
+      </div>
+    </div>
+
+    <nav class="nav-section">
+      <label>Navigation</label>
+      <div class="nav-item active" onclick="setView('all')">
+        <span class="nav-icon">📋</span> All Test Cases
+        <span class="nav-count" id="navAll">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('pending')">
+        <span class="nav-icon">⏳</span> Pending
+        <span class="nav-count" id="navPending">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('in-progress')">
+        <span class="nav-icon">🔄</span> In Progress
+        <span class="nav-count" id="navInProgress">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('pass')">
+        <span class="nav-icon">✅</span> Passed
+        <span class="nav-count" id="navPass">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('fail')">
+        <span class="nav-icon">❌</span> Failed
+        <span class="nav-count" id="navFail">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('blocked')">
+        <span class="nav-icon">🚫</span> Blocked
+        <span class="nav-count" id="navBlocked">0</span>
+      </div>
+    </nav>
+
+    <nav class="nav-section">
+      <label>Modules</label>
+      <div id="moduleNav"></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <strong>Chantel Hlongwane</strong>
+      QA / Functional Analyst<br>
+      Portfolio Project · 2025
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1 id="pageTitle">All Test Cases</h1>
+        <p id="pageSubtitle">VAC00459/27 · IFASS DOD · SITA Erasmuskloof</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">+ Add Test Case</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Cases</div>
+        <div class="stat-num" id="stTotal">0</div>
+        <div class="stat-sub">across all modules</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-label">Passed</div>
+        <div class="stat-num" id="stPass">0</div>
+        <div class="stat-sub">test cases</div>
+      </div>
+      <div class="stat red">
+        <div class="stat-label">Failed</div>
+        <div class="stat-num" id="stFail">0</div>
+        <div class="stat-sub">need remediation</div>
+      </div>
+      <div class="stat amber">
+        <div class="stat-label">Blocked</div>
+        <div class="stat-num" id="stBlocked">0</div>
+        <div class="stat-sub">awaiting resolution</div>
+      </div>
+      <div class="stat purple">
+        <div class="stat-label">Defects</div>
+        <div class="stat-num" id="stDefects">0</div>
+        <div class="stat-sub">logged</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <strong>UAT Progress</strong>
+        <span id="progressPct">0% complete</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-pass" id="barPass" style="width:0%"></div>
+        <div class="progress-fail" id="barFail" style="width:0%"></div>
+        <div class="progress-blocked" id="barBlocked" style="width:0%"></div>
+        <div class="progress-pending" id="barPending" style="width:100%"></div>
+      </div>
+      <div class="progress-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Pass</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Fail</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Blocked</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#cbd5e1"></div>Pending</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search test cases…" oninput="renderTable()">
+      </div>
+      <select id="filterModule" onchange="renderTable()">
+        <option value="">All Modules</option>
+      </select>
+      <select id="filterPriority" onchange="renderTable()">
+        <option value="">All Priorities</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>TC ID</th>
+            <th>Test Case</th>
+            <th>Priority</th>
+            <th>Tester</th>
+            <th>Status</th>
+            <th>Defects</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-bg" id="modalBg" onclick="closeBgClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Test Case</h2>
+      <p id="modalSub">Define a new functional test case for UAT execution</p>
+    </div>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Test Case Title *</label>
+        <input type="text" id="fTitle" placeholder="e.g. Verify user can log in with valid credentials">
+      </div>
+      <div class="field">
+        <label>Module / Feature *</label>
+        <input type="text" id="fModule" placeholder="e.g. Authentication">
+      </div>
+      <div class="field">
+        <label>Priority</label>
+        <select id="fPriority">
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Test Steps</label>
+        <textarea id="fSteps" rows="3" placeholder="1. Navigate to login page&#10;2. Enter valid credentials&#10;3. Click submit"></textarea>
+      </div>
+      <div class="field full">
+        <label>Expected Result</label>
+        <textarea id="fExpected" rows="2" placeholder="User is redirected to the dashboard and a welcome message is displayed"></textarea>
+      </div>
+      <div class="field">
+        <label>Assigned Tester</label>
+        <input type="text" id="fTester" placeholder="e.g. C. Hlongwane">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="fStatus">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="pass">Pass</option>
+          <option value="fail">Fail</option>
+          <option value="blocked">Blocked</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Actual Result / Notes</label>
+        <textarea id="fActual" rows="2" placeholder="Observed behaviour during test execution…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTC()">Save Test Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- Defect Panel -->
+<div class="defect-panel" id="defectPanel" onclick="closeDefectBg(event)">
+  <div class="defect-inner">
+    <h2>🐛 Defect Log</h2>
+    <p id="defectTCTitle">Test case defects</p>
+    <div class="defect-list" id="defectList"></div>
+    <div class="add-defect-form">
+      <h3>Log New Defect</h3>
+      <div class="field"><label>Defect Title</label><input type="text" id="dTitle" placeholder="e.g. Login button unresponsive on mobile"></div>
+      <div class="field"><label>Description</label><textarea id="dDesc" rows="2" placeholder="Steps to reproduce and impact…"></textarea></div>
+      <div class="field"><label>Severity</label>
+        <select id="dSeverity">
+          <option>Critical</option><option>Major</option><option>Minor</option>
+        </select>
+      </div>
+      <div class="modal-actions" style="padding-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="closeDefect()">Close</button>
+        <button class="btn btn-danger btn-sm" onclick="addDefect()">Log Defect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let tests = JSON.parse(localStorage.getItem('qavault') || '[]');
+let editId = null;
+let defectTCId = null;
+let currentView = 'all';
+
+// Seed data
+if (!tests.length) {
+  tests = [
+    { id:'TC-001', title:'Verify user login with valid credentials', module:'Authentication', priority:'High', tester:'C. Hlongwane', status:'pass', steps:'1. Open application\n2. Enter valid username and password\n3. Click Login', expected:'User is redirected to dashboard', actual:'Passed as expected', defects:[] },
+    { id:'TC-002', title:'Verify login fails with invalid password', module:'Authentication', priority:'High', tester:'C. Hlongwane', status:'pass', steps:'1. Enter valid username with wrong password\n2. Click Login', expected:'Error message displayed', actual:'Correct error shown', defects:[] },
+    { id:'TC-003', title:'Validate purchase order creation', module:'Procurement', priority:'High', tester:'N. Sithole', status:'fail', steps:'1. Navigate to Procurement module\n2. Create new PO\n3. Submit for approval', expected:'PO saved with reference number', actual:'System throws 500 error on submit', defects:[{ id:'DEF-001', title:'PO submission throws 500 error', desc:'System crashes when submitting PO with line items > 10', severity:'Critical' }] },
+    { id:'TC-004', title:'Verify asset register search functionality', module:'Asset Management', priority:'Medium', tester:'C. Hlongwane', status:'in-progress', steps:'1. Navigate to asset register\n2. Search by asset ID\n3. Verify results', expected:'Matching assets displayed within 3 seconds', actual:'Still executing', defects:[] },
+    { id:'TC-005', title:'Validate monthly expenditure report generation', module:'Reporting', priority:'Medium', tester:'T. Dlamini', status:'blocked', steps:'1. Navigate to Reports\n2. Select monthly expenditure\n3. Set date range and generate', expected:'PDF report downloaded', actual:'Report module not accessible — awaiting environment access', defects:[{ id:'DEF-002', title:'Report module access denied', desc:'Test environment does not have report module permissions configured', severity:'Major' }] },
+    { id:'TC-006', title:'Verify supplier onboarding form validation', module:'Procurement', priority:'Low', tester:'N. Sithole', status:'pending', steps:'1. Open supplier form\n2. Leave required fields blank\n3. Submit', expected:'Validation errors displayed per field', actual:'', defects:[] },
+    { id:'TC-007', title:'Test password reset via email link', module:'Authentication', priority:'Medium', tester:'C. Hlongwane', status:'pass', steps:'1. Click Forgot Password\n2. Enter registered email\n3. Follow reset link', expected:'Password reset successfully', actual:'Passed', defects:[] },
+    { id:'TC-008', title:'Validate inventory stock level update', module:'Asset Management', priority:'High', tester:'T. Dlamini', status:'pending', steps:'1. Navigate to inventory\n2. Update stock quantity\n3. Save changes', expected:'Stock levels updated and audit log created', actual:'', defects:[] },
+  ];
+  save();
+}
+
+function save() { localStorage.setItem('qavault', JSON.stringify(tests)); }
+
+function genId() {
+  const nums = tests.map(t => parseInt(t.id.split('-')[1] || 0));
+  return 'TC-' + String((nums.length ? Math.max(...nums) : 0) + 1).padStart(3,'0');
+}
+
+function statusLabel(s) {
+  return { 'pass':'Pass','fail':'Fail','blocked':'Blocked','pending':'Pending','in-progress':'In Progress' }[s] || s;
+}
+
+function updateStats() {
+  const total = tests.length;
+  const pass = tests.filter(t=>t.status==='pass').length;
+  const fail = tests.filter(t=>t.status==='fail').length;
+  const blocked = tests.filter(t=>t.status==='blocked').length;
+  const pending = tests.filter(t=>t.status==='pending').length;
+  const inprog = tests.filter(t=>t.status==='in-progress').length;
+  const defects = tests.reduce((a,t)=>a+(t.defects||[]).length,0);
+
+  document.getElementById('stTotal').textContent = total;
+  document.getElementById('stPass').textContent = pass;
+  document.getElementById('stFail').textContent = fail;
+  document.getElementById('stBlocked').textContent = blocked;
+  document.getElementById('stDefects').textContent = defects;
+
+  document.getElementById('navAll').textContent = total;
+  document.getElementById('navPending').textContent = pending;
+  document.getElementById('navInProgress').textContent = inprog;
+  document.getElementById('navPass').textContent = pass;
+  document.getElementById('navFail').textContent = fail;
+  document.getElementById('navBlocked').textContent = blocked;
+
+  const pct = total ? Math.round((pass/total)*100) : 0;
+  document.getElementById('progressPct').textContent = pct + '% complete';
+  document.getElementById('barPass').style.width = total ? (pass/total*100)+'%' : '0%';
+  document.getElementById('barFail').style.width = total ? (fail/total*100)+'%' : '0%';
+  document.getElementById('barBlocked').style.width = total ? (blocked/total*100)+'%' : '0%';
+  document.getElementById('barPending').style.width = total ? ((pending+inprog)/total*100)+'%' : '100%';
+
+  // Module nav
+  const modules = [...new Set(tests.map(t=>t.module))].sort();
+  document.getElementById('moduleNav').innerHTML = modules.map(m=>`
+    <div class="nav-item" onclick="filterByModule('${m}')">
+      <span class="nav-icon">📁</span> ${m}
+      <span class="nav-count">${tests.filter(t=>t.module===m).length}</span>
+    </div>
+  `).join('');
+
+  // Module filter dropdown
+  const sel = document.getElementById('filterModule');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Modules</option>' + modules.map(m=>`<option ${m===cur?'selected':''}>${m}</option>`).join('');
+}
+
+function filterByModule(m) {
+  document.getElementById('filterModule').value = m;
+  setView('all');
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick') === `setView('${v}')`);
+  });
+  const labels = { all:'All Test Cases', pending:'Pending', 'in-progress':'In Progress', pass:'Passed', fail:'Failed', blocked:'Blocked' };
+  document.getElementById('pageTitle').textContent = labels[v] || v;
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const fm = document.getElementById('filterModule').value;
+  const fp = document.getElementById('filterPriority').value;
+
+  let filtered = tests.filter(t => {
+    const matchView = currentView === 'all' || t.status === currentView;
+    const matchQ = !q || [t.title, t.id, t.module, t.tester].some(v=>(v||'').toLowerCase().includes(q));
+    const matchM = !fm || t.module === fm;
+    const matchP = !fp || t.priority === fp;
+    return matchView && matchQ && matchM && matchP;
+  });
+
+  const tbody = document.getElementById('tableBody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📭</div><h3>No test cases found</h3><p>Try adjusting your filters or add a new test case.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(t => `
+    <tr>
+      <td><span class="tc-id">${t.id}</span></td>
+      <td>
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-module">${t.module}</div>
+      </td>
+      <td><span class="priority-badge priority-${t.priority.toLowerCase()}">${t.priority}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${t.tester||'—'}</td>
+      <td><span class="status-badge s-${t.status}">${statusLabel(t.status)}</span></td>
+      <td>
+        ${(t.defects||[]).length
+          ? `<span class="defect-count">🐛 ${t.defects.length}</span>`
+          : `<span class="defect-count none">—</span>`}
+      </td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="openDefect('${t.id}')">Defects</button>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('${t.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTC('${t.id}')">✕</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  updateStats();
+}
+
+function openModal(id=null) {
+  editId = id;
+  clearForm();
+  if (id) {
+    const t = tests.find(x=>x.id===id);
+    document.getElementById('modalTitle').textContent = 'Edit Test Case';
+    document.getElementById('modalSub').textContent = `Editing ${t.id}`;
+    document.getElementById('fTitle').value = t.title;
+    document.getElementById('fModule').value = t.module;
+    document.getElementById('fPriority').value = t.priority;
+    document.getElementById('fSteps').value = t.steps||'';
+    document.getElementById('fExpected').value = t.expected||'';
+    document.getElementById('fTester').value = t.tester||'';
+    document.getElementById('fStatus').value = t.status;
+    document.getElementById('fActual').value = t.actual||'';
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Test Case';
+    document.getElementById('modalSub').textContent = 'Define a new functional test case';
+  }
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); editId=null; clearForm(); }
+function closeBgClick(e) { if(e.target===document.getElementById('modalBg')) closeModal(); }
+
+function clearForm() {
+  ['fTitle','fModule','fSteps','fExpected','fTester','fActual'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPriority').value = 'High';
+  document.getElementById('fStatus').value = 'pending';
+}
+
+function saveTC() {
+  const title = document.getElementById('fTitle').value.trim();
+  const module = document.getElementById('fModule').value.trim();
+  if (!title || !module) { alert('Title and Module are required.'); return; }
+  const data = {
+    title, module,
+    priority: document.getElementById('fPriority').value,
+    steps: document.getElementById('fSteps').value.trim(),
+    expected: document.getElementById('fExpected').value.trim(),
+    tester: document.getElementById('fTester').value.trim(),
+    status: document.getElementById('fStatus').value,
+    actual: document.getElementById('fActual').value.trim(),
+  };
+  if (editId) {
+    const idx = tests.findIndex(t=>t.id===editId);
+    tests[idx] = { ...tests[idx], ...data };
+  } else {
+    tests.push({ id:genId(), defects:[], ...data });
+  }
+  save(); closeModal(); renderTable();
+}
+
+function deleteTC(id) {
+  const t = tests.find(x=>x.id===id);
+  if (!confirm(`Delete ${t.id}: "${t.title}"?`)) return;
+  tests = tests.filter(x=>x.id!==id);
+  save(); renderTable();
+}
+
+// Defects
+function openDefect(id) {
+  defectTCId = id;
+  const t = tests.find(x=>x.id===id);
+  document.getElementById('defectTCTitle').textContent = `${t.id} — ${t.title}`;
+  renderDefects(t);
+  document.getElementById('defectPanel').classList.add('open');
+}
+function closeDefect() { document.getElementById('defectPanel').classList.remove('open'); defectTCId=null; }
+function closeDefectBg(e) { if(e.target===document.getElementById('defectPanel')) closeDefect(); }
+
+function renderDefects(t) {
+  const list = document.getElementById('defectList');
+  if (!(t.defects||[]).length) {
+    list.innerHTML = `<p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px">No defects logged for this test case.</p>`;
+    return;
+  }
+  list.innerHTML = t.defects.map(d=>`
+    <div class="defect-item">
+      <div class="defect-item-header">
+        <span class="defect-item-id">${d.id} · ${d.severity}</span>
+        <button class="btn btn-danger btn-sm" onclick="removeDefect('${d.id}')">✕</button>
+      </div>
+      <div class="defect-item-title">${d.title}</div>
+      <div class="defect-item-desc">${d.desc||''}</div>
+    </div>
+  `).join('');
+}
+
+function addDefect() {
+  const title = document.getElementById('dTitle').value.trim();
+  if (!title) { alert('Defect title required.'); return; }
+  const t = tests.find(x=>x.id===defectTCId);
+  const nums = t.defects.map(d=>parseInt(d.id.split('-')[1]||0));
+  const allNums = tests.flatMap(tc=>tc.defects.map(d=>parseInt(d.id.split('-')[1]||0)));
+  const next = (allNums.length ? Math.max(...allNums) : 0) + 1;
+  t.defects.push({
+    id: 'DEF-' + String(next).padStart(3,'0'),
+    title,
+    desc: document.getElementById('dDesc').value.trim(),
+    severity: document.getElementById('dSeverity').value,
+  });
+  if (t.status === 'pass') t.status = 'fail';
+  document.getElementById('dTitle').value = '';
+  document.getElementById('dDesc').value = '';
+  save(); renderDefects(t); renderTable();
+}
+
+function removeDefect(defId) {
+  const t = tests.find(x=>x.id===defectTCId);
+  t.defects = t.defects.filter(d=>d.id!==defId);
+  save(); renderDefects(t); renderTable();
+}
+
+// Init
+renderTable();
+updateStats();
+</script>
+</body>
+</html>
